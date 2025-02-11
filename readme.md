@@ -1,44 +1,44 @@
 # Automatización de Envío de Recordatorios
 
 ## Descripción del Proceso Automatizado
-Se ha desarrollado un módulo en Odoo que envía automáticamente recordatorios de pago a los clientes con facturas vencidas en los próximos tres días. Este proceso ayuda a mejorar la gestión de cobros y evitar retrasos en los pagos.
+Este módulo de Odoo envía automáticamente recordatorios de pago a los clientes que tienen facturas con vencimiento en los próximos tres días. Su objetivo es mejorar la gestión de cobros y evitar retrasos en los pagos, notificando a los clientes de manera oportuna.
 
 ## Requisitos Funcionales y No Funcionales
 
 ### Funcionales:
-- Identificar facturas con fecha de vencimiento dentro de los próximos tres días.
-- Enviar correos electrónicos automáticos a los clientes con recordatorio de pago.
-- Utilizar una plantilla de correo predefinida.
+- Identifica facturas con fecha de vencimiento dentro de los próximos tres días.
+- Envía correos electrónicos automáticos a los clientes con un recordatorio de pago.
+- Utiliza una plantilla de correo predefinida para los mensajes.
 
 ### No Funcionales:
-- La automatización debe ejecutarse como una tarea programada en Odoo.
-- El sistema debe verificar que el cliente tenga un correo registrado antes de enviar el recordatorio.
-- La solución debe ser escalable y fácil de modificar.
+- La automatización se ejecuta como una tarea programada en Odoo (cron job).
+- El sistema verifica que el cliente tenga un correo electrónico registrado antes de enviar el recordatorio.
+- La solución es escalable y fácil de modificar.
 
 ## Pasos Seguidos en el Desarrollo
-1. **Extender el modelo `account.move`** para agregar la función `_send_payment_reminder`.
-2. **Buscar facturas con vencimiento en los próximos tres días y estado no pagado**.
-3. **Verificar que el cliente tenga un correo electrónico registrado**.
-4. **Enviar el correo utilizando una plantilla predefinida**.
-5. **Crear una tarea programada (`cron job`) para ejecutar la función periódicamente**.
+1. **Extensión del modelo `account.move`:** Se agregó la función `_send_payment_reminder` para gestionar el envío de recordatorios.
+2. **Búsqueda de facturas:** Se identifican las facturas con vencimiento en los próximos tres días y que no estén pagadas.
+3. **Verificación de correo electrónico:** Se asegura que el cliente tenga un correo electrónico registrado antes de enviar el recordatorio.
+4. **Envío de correos:** Se utiliza una plantilla de correo predefinida para enviar los recordatorios.
+5. **Tarea programada:** Se creó un cron job para ejecutar la función periódicamente.
 
 ## Ejemplo de Código
-
 ```python
-from odoo import models, fields, api
+from odoo import models, api
 from datetime import datetime, timedelta
 
-class PaymentReminder(models.Model):
+class AccountMove(models.Model):
     _inherit = 'account.move'
 
     def _send_payment_reminder(self):
         today = datetime.today().date()
         invoices = self.search([
+            ('invoice_date_due', '>=', today),
             ('invoice_date_due', '<=', today + timedelta(days=3)),
             ('payment_state', '!=', 'paid')
         ])
         
-        mail_template = self.env.ref('mail_template_payment_reminder')
+        mail_template = self.env.ref('payment_reminder.mail_template_payment_reminder')
         
         for invoice in invoices:
             if invoice.partner_id.email:
@@ -46,12 +46,15 @@ class PaymentReminder(models.Model):
 ```
 
 ## Resultados de las Pruebas Realizadas
-- Se probó la ejecución manual de la función `_send_payment_reminder` y se verificó que las facturas correctas fueron seleccionadas.
-- Se validó que los correos electrónicos fueron enviados solo a clientes con correos registrados.
-- Se configuró la tarea programada y se comprobó su ejecución en el tiempo esperado.
+- Se verificó que la función selecciona correctamente las facturas con vencimiento en los próximos tres días.
+
+- Se comprobó que los correos electrónicos se envían solo a clientes con correos registrados.
+
+- La tarea programada se ejecuta en el intervalo de tiempo configurado.
 
 ## Conclusiones y Posibles Mejoras
-- La automatización mejora la eficiencia en la gestión de cobros.
-- Se podría agregar una opción para personalizar los días de anticipación del recordatorio.
-- Se podría implementar una vista en la interfaz de usuario para gestionar los recordatorios enviados.
+- El módulo mejora significativamente la eficiencia en la gestión de cobros.
 
+- En el futuro, se podría agregar una opción para personalizar los días de anticipación del recordatorio.
+
+- También se podría implementar una vista en la interfaz de usuario para gestionar los recordatorios enviados.
