@@ -1,1 +1,1 @@
-from . import payment_reminder
+from . import models
