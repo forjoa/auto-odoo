@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Plantilla de correo para recordatorio de pago -->
+        <record id="mail_template_payment_reminder" model="mail.template">
+            <field name="name">Payment Reminder</field>
+            <field name="email_from">info@yourcompany.com</field>
+            <field name="subject">Recordatorio de pago: Factura ${object.name}</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="body_html"><![CDATA[
+                <p>Estimado/a ${object.partner_id.name},</p>
+                <p>Le recordamos que su factura <strong>${object.name}</strong> vence el <strong>${object.invoice_date_due}</strong>.</p>
+                <p>Por favor, proceda con el pago lo antes posible.</p>
+            ]]></field>
+        </record>
+
+        <!-- Tarea programada para ejecutar el recordatorio -->
+        <record id="ir_cron_payment_reminder" model="ir.cron">
+            <field name="name">Enviar recordatorios de pago</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">model._send_payment_reminder()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+        </record>
+    </data>
+</odoo>
