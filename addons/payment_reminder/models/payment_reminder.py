@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    @api.model
     def _send_payment_reminder(self):
         today = datetime.today().date()
         invoices = self.search([
