@@ -1,12 +1,13 @@
-from odoo import models, fields, api
+from odoo import models, api
 from datetime import datetime, timedelta
 
-class PaymentReminder(models.Model):
+class AccountMove(models.Model):
     _inherit = 'account.move'
 
     def _send_payment_reminder(self):
         today = datetime.today().date()
         invoices = self.search([
+            ('invoice_date_due', '>=', today),
             ('invoice_date_due', '<=', today + timedelta(days=3)),
             ('payment_state', '!=', 'paid')
         ])
@@ -16,10 +17,3 @@ class PaymentReminder(models.Model):
         for invoice in invoices:
             if invoice.partner_id.email:
                 mail_template.send_mail(invoice.id, force_send=True)
-
-class PaymentReminderCron(models.Model):
-    _name = 'payment.reminder.cron'
-    _description = 'Scheduled Task to Send Payment Reminders'
-    
-    def run_cron_task(self):
-        self.env['account.move']._send_payment_reminder()
