@@ -2,7 +2,7 @@
     'name': 'Payment Reminder',
     'version': '1.0',
     'summary': 'Automated payment reminders for invoices',
-    'author': 'Tu Nombre',
+    'author': 'Joaquin',
     'category': 'Accounting',
     'depends': ['account', 'mail'],
     'data': [
